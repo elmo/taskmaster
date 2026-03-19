@@ -3,7 +3,7 @@ import api from "../utils/api";
 
 const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
   const [formData, setFormData] = useState({
-    email: "",
+    email_address: "",
     password: "",
     password_confirmation: ""
   });
@@ -27,7 +27,6 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
     setError(null);
 
     try {
-      // POST to your Rails users endpoint
       // We wrap the data in a 'user' key to match Rails 'params.require(:user)'
       const { data } = await api.post("/api/v1/users", { user: formData });
       
@@ -46,7 +45,7 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-20 p-8 bg-white rounded-2xl shadow-2xl border border-gray-100">
+    <div className="max-w-md mx-auto mt-0 p-8 bg-white rounded-2xl shadow-2xl border border-gray-100">
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-gray-800">Create Account</h2>
         <p className="text-gray-500 mt-2">Join us to start organizing your day</p>
@@ -58,11 +57,11 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
             Email Address
           </label>
           <input
-            name="email"
+            name="email_address"
             type="email"
             className="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
             placeholder="name@example.com"
-            value={formData.email}
+            value={formData.email_address}
             onChange={handleChange}
             required
           />

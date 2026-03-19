@@ -32,7 +32,7 @@ const Login = ({ onLoginSuccess, onSwitchToRegister }) => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-20 p-8 bg-white rounded-2xl shadow-2xl border border-gray-100">
+    <div className="max-w-md mx-auto mt-0 p-8 bg-white rounded-2xl shadow-2xl border border-gray-100">
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-gray-800">Welcome Back</h2>
         <p className="text-gray-500 mt-2">Sign in to manage your tasks</p>

@@ -1,4 +1,5 @@
 # app/controllers/concerns/authenticatable.rb
+require 'jwt'
 module Authenticatable
   extend ActiveSupport::Concern
 

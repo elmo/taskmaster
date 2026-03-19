@@ -1,6 +1,6 @@
 class RegistrationsController < ApplicationController
   # 1. Skip the login requirement for these two actions
-  allow_unauthenticated_access only: [ :new, :create ]
+  #allow_unauthenticated_access only: [ :new, :create ]
 
   def new
     @user = User.new

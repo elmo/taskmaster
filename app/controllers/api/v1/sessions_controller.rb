@@ -1,31 +1,28 @@
-# app/controllers/api/v1/users_controller.rb
 module Api
   module V1
-    class UsersController < ApiController
-      # We skip the JWT check because the user doesn't have a token yet!
-      skip_before_action :authenticate_by_jwt, only: [:create]
-
+    class SessionsController < ApplicationController
+      include Authenticatable
+      skip_before_action :verify_authenticity_token, raise: false
       def create
-        @user = User.new(user_params)
+        user = User.find_by(email_address: params[:email].downcase)
 
-        if @user.save
-          # Create a fresh token for the new user
-          token = JwtService.encode({ user_id: @user.id })
+        if user&.authenticate(params[:password])
+          # Generate token (Assuming you have a WebToken helper or logic in User model)
+          token = JwtService.encode(user_id: user.id)
           
           render json: {
             token: token,
-            user: { id: @user.id, email: @user.email }
-          }, status: :created
+            user: { id: user.id, email: user.email_address }
+          }, status: :ok
         else
-          # Return 422 so Axios hits the 'catch' block in React
-          render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
+          render json: { error: "Invalid email or password" }, status: :unauthorized
         end
       end
 
-      private
-
-      def user_params
-        params.require(:user).permit(:email_address, :password, :password_confirmation)
+      def destroy
+        # With JWT, 'logging out' is usually handled by the client 
+        # deleting the token, but you can implement blacklisting here.
+        head :no_content
       end
     end
   end

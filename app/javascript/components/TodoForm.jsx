@@ -14,7 +14,7 @@ const TodoForm = ({ onAdd, isLoading }) => {
     <form onSubmit={handleSubmit} className="flex mb-4">
       <input
         type="text"
-        className="border p-2 flex-grow rounded-l focus:ring-2 focus:ring-blue-500 outline-none"
+        className="border p-2 flex-grow rounded-l focus:ring-2 focus:ring-blue-500 outline-none m-1"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="What needs to be done?"
@@ -22,7 +22,7 @@ const TodoForm = ({ onAdd, isLoading }) => {
       <button 
         type="submit" 
         disabled={isLoading || !title.trim()}
-        className="bg-blue-600 text-white px-4 py-2 rounded-r disabled:bg-blue-300 transition-colors"
+        className="bg-blue-600 text-white px-4 py-2 rounded disabled:bg-blue-500 transition-colors m-1"
       >
         {isLoading ? "..." : "Add"}
       </button>
