@@ -7,6 +7,7 @@ const api = axios.create({
   baseURL: window.ENV?.API_URL || "https://127.0.0.1:3000",
   headers: {
     "Content-Type": "application/json",
+    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content
   },
 });
 

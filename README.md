@@ -96,6 +96,10 @@ curl -X POST https://127:0.0.1:3000/api/v1/users \
 
 bundle exec rspec 
 
+#### Vite test
+
+npm test
+
 #### Todo
   More tests
   Graphql implementation

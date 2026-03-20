@@ -1,3 +1,4 @@
 web: env RUBY_DEBUG_OPEN=true bin/rails server -b 'ssl://localhost:3000?key=config/certs/server.key&cert=config/certs/server.crt'
-js: API_URL=https://http://127.0.0.1:3000 yarn build --watch
+#js: API_URL=https://http://127.0.0.1:3000 yarn build --watch
+js: bin/vite dev 
 css: yarn build:css --watch
