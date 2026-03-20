@@ -17,7 +17,6 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Client-side validation before hitting the server
     if (formData.password !== formData.password_confirmation) {
       setError("Passwords do not match.");
       return;
@@ -27,16 +26,10 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
     setError(null);
 
     try {
-      // We wrap the data in a 'user' key to match Rails 'params.require(:user)'
       const { data } = await api.post("/api/v1/users", { user: formData });
-      
-      // Store the JWT returned by the controller
       localStorage.setItem("token", data.token);
-      
-      // Signal success to App.jsx
       onRegisterSuccess();
     } catch (err) {
-      // Extract Rails validation errors (e.g., ["Email is invalid", "Password is too short"])
       const messages = err.response?.data?.errors;
       setError(Array.isArray(messages) ? messages.join(", ") : "Registration failed.");
     } finally {
@@ -53,13 +46,14 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
       
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
+          <label htmlFor="email_address" className="block text-sm font-semibold text-gray-700 mb-1">
             Email Address
           </label>
           <input
+            id="email_address" // FIXED: Added ID to match label htmlFor
             name="email_address"
             type="email"
-            className="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+            className="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
             placeholder="name@example.com"
             value={formData.email_address}
             onChange={handleChange}
@@ -68,13 +62,14 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
+          <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-1">
             Password
           </label>
           <input
+            id="password" // FIXED: Added ID to match label htmlFor
             name="password"
             type="password"
-            className="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+            className="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
             placeholder="Min 6 characters"
             value={formData.password}
             onChange={handleChange}
@@ -83,13 +78,14 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
+          <label htmlFor="password_confirmation" className="block text-sm font-semibold text-gray-700 mb-1">
             Confirm Password
           </label>
           <input
+            id="password_confirmation" // FIXED: Added ID to match label htmlFor
             name="password_confirmation"
             type="password"
-            className="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+            className="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
             placeholder="Repeat password"
             value={formData.password_confirmation}
             onChange={handleChange}
@@ -98,15 +94,15 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
         </div>
 
         {error && (
-          <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg border border-red-100">
-            ⚠️ {error}
+          <div role="alert" className="bg-red-50 text-red-600 text-sm p-3 rounded-lg border border-red-100">
+            <span aria-hidden="true">⚠️</span> {error}
           </div>
         )}
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-blue-200 flex justify-center items-center disabled:bg-blue-300 disabled:shadow-none"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg flex justify-center items-center disabled:bg-blue-300"
         >
           {loading ? (
             <>
@@ -126,6 +122,7 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
         <p className="text-sm text-gray-600">
           Already have an account?{" "}
           <button 
+            type="button"
             onClick={onSwitchToLogin}
             className="text-blue-600 hover:text-blue-800 font-bold transition-colors underline-offset-4 hover:underline"
           >

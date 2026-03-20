@@ -7,6 +7,6 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./app/javascript/test/setup.js'],
     // The ** is the key here—it matches any number of subdirectories
-    include: ['app/javascript/**/__tests__/**/*.{test,spec}.{js,jsx}', 'app/javascript/**/*.{test,spec}.{js,jsx}'],
+    include: ['app/javascript/**/__tests__/**/*.{test,spec}.{js,jsx,tsx}', 'app/javascript/**/*.{test,spec}.{js,jsx}'],
   },
 })

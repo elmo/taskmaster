@@ -18,7 +18,7 @@ module Api
           }, status: :created
         else
           # Return 422 so Axios hits the 'catch' block in React
-          render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
+          render json: { errors: @user.errors.full_messages }, status: :unprocessable_content
         end
       end
 
