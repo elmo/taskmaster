@@ -1,16 +1,16 @@
-TaskMaster: Rails 8 + React TS Demo
-A modern, full-stack Task Management application built to demonstrate the integration of Rails 8, React 18 (TypeScript), and JWT-based Authentication.
+
+# TaskMaster: Rails 8 + React 
+
+A modern, commerical-grade React on Rails task management application built to demonstrate the integration of Rails 8, React 18 (Javascript / TypeScript), and JWT-based Authentication.
 
 ### 🚀 Tech Stack
 Backend: Ruby on Rails 8.0+ (API Mode)
-
 Frontend: React 18, TypeScript, Tailwind CSS 4.0
-
 Database: PostgreSQL or SQLite
-
 Authentication: JWT (JSON Web Tokens) with Bcrypt
-
 Tooling: Esbuild, Propshaft, Axios
+Backend testing: Rspec 
+Frontend testing: Vitest 
 
 ### 🏗️ Architectural Highlights
 JWT Auth Bridge: A custom authentication flow where the Rails backend issues tokens upon login/registration, which are then managed by a persistent React state and Axios interceptors.
@@ -36,7 +36,6 @@ Install dependencies
 
 bundle install
 npm install
-
 
 ## 🔒 Local SSL Setup (Optional)
 
@@ -69,37 +68,31 @@ https://127.0.0.1:3000
  ├── javascript/
  │   ├── components/        # React TSX components (Login, Register, TodoList)
  │   ├── utils/             # Axios configuration and API helpers
- │   └── App.jsx            # Main React Entry Point
+ │   └──  entrypoints/
+ |        |__ App.jsx         Main React Entry Point
  ├── models/                # User and Todo ActiveRecord models
  └── assets/                # Tailwind 4 CSS and static assets
 ```
 
 #### 🔒 Authentication Flow
 Register/Login: User submits credentials to /api/v1/login or /api/v1/users.
-
 Token Issuance: Rails validates and returns a JWT in the JSON response.
-
 Persistence: The React frontend stores the token in localStorage.
-
 Authorization: All subsequent requests include the Authorization: Bearer <token> header via a global Axios interceptor.
 
 ### 🧪 Testing the API
 You can test the backend independently using curl or Postman:
 
-#### Register a User:
+#### CURL 
 
 curl -X POST https://127:0.0.1:3000/api/v1/users \
      -H "Content-Type: application/json" \
      -d '{"user": {"email": "test@example.com", "password": "password123"}}'
 
-#### Rspec:
+#### CI 
 
-bundle exec rspec 
+bin/rake ci:all
 
-#### Vite test
-
-npm test
-
-#### Todo
-  More tests
-  Graphql implementation
+#### TODO
+exract into gem
+graphql enpoint

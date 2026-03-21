@@ -1,68 +1,67 @@
-import React from "react";
-import { render, screen, fireEvent, waitFor, waitForElementToBeRemoved } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import App from "../App";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import api from "../../utils/api"; // Corrected path to match your previous files
+import App from "../App";
 
 // 1. Mock the API module
 vi.mock("../../utils/api", () => ({
-  default: {
-    get: vi.fn(),
-    post: vi.fn(),
-    patch: vi.fn(),
-    delete: vi.fn(),
-  },
+	default: {
+		get: vi.fn(),
+		post: vi.fn(),
+		patch: vi.fn(),
+		delete: vi.fn(),
+	},
 }));
 
 describe("App Component Integration", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    localStorage.clear();
-    vi.resetModules();
-  });
+	beforeEach(() => {
+		vi.clearAllMocks();
+		localStorage.clear();
+		vi.resetModules();
+	});
 
+	it("handles adding a new todo", async () => {
+		localStorage.setItem("token", "fake-token");
+		const newTodo = { id: 3, title: "New Task", completed: false };
 
-  it("handles adding a new todo", async () => {
-    localStorage.setItem("token", "fake-token");
-    const newTodo = { id: 3, title: "New Task", completed: false };
-    
-    (api.get as any).mockResolvedValueOnce({ data: [] });
-    (api.post as any).mockResolvedValueOnce({ data: newTodo });
+		vi.mocked(api.get).mockResolvedValueOnce({ data: [] });
+		vi.mocked(api.post).mockResolvedValueOnce({ data: newTodo });
 
-    render(<App />);
+		render(<App />);
 
-    // Wait for App to render the Task list
-    const input = await screen.findByPlaceholderText(/What needs to be done?/i);
-    
-    fireEvent.change(input, { target: { value: "New Task" } });
-    fireEvent.submit(input.closest("form")!);
+		// Wait for App to render the Task list
+		const input = await screen.findByPlaceholderText(/What needs to be done?/i);
 
-    await waitFor(() => {
-      expect(api.post).toHaveBeenCalledWith("/api/v1/todos", { title: "New Task" });
-      expect(screen.getByText("New Task")).toBeInTheDocument();
-    });
-  });
+		fireEvent.change(input, { target: { value: "New Task" } });
+		const form = input.closest("form");
+		if (form) fireEvent.submit(form);
 
-  it("logs out and clears state", async () => {
-  localStorage.setItem("token", "fake-token");
-  (api.get as any).mockResolvedValueOnce({ data: [] });
+		await waitFor(() => {
+			expect(api.post).toHaveBeenCalledWith("/api/v1/todos", {
+				title: "New Task",
+			});
+			expect(screen.getByText("New Task")).toBeInTheDocument();
+		});
+	});
 
-  render(<App />);
+	it("logs out and clears state", async () => {
+		localStorage.setItem("token", "fake-token");
+		vi.mocked(api.get).mockResolvedValueOnce({ data: [] });
 
-  const logoutBtn = await screen.findByRole("button", { name: /Logout/i });
-  fireEvent.click(logoutBtn);
+		render(<App />);
 
-  // This will pause the test and print the HTML to your terminal
-  // Look for "Welcome Back" or "Tasks" in the output!
-  screen.debug();
+		const logoutBtn = await screen.findByRole("button", { name: /Logout/i });
+		fireEvent.click(logoutBtn);
 
-  await waitFor(() => {
-    expect(localStorage.getItem("token")).toBeNull();
-    // Use queryByText so it doesn't throw an error immediately,
-    // allowing us to see the debug output above.
-    expect(screen.queryByText(/Login|Welcome/i)).toBeInTheDocument();
-  });
-});
+		// This will pause the test and print the HTML to your terminal
+		// Look for "Welcome Back" or "Tasks" in the output!
+		screen.debug();
 
-
+		await waitFor(() => {
+			expect(localStorage.getItem("token")).toBeNull();
+			// Use queryByText so it doesn't throw an error immediately,
+			// allowing us to see the debug output above.
+			expect(screen.queryByText(/Login|Welcome/i)).toBeInTheDocument();
+		});
+	});
 });

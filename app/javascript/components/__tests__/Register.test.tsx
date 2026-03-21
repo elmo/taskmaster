@@ -1,116 +1,172 @@
-import React from 'react'; 
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import Register from "../Register"; 
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import api from "../../utils/api";
+import Register from "../Register";
 
 // Mock the API utility
 vi.mock("../../utils/api", () => ({
-  default: {
-    post: vi.fn(),
-  },
+	default: {
+		post: vi.fn(),
+	},
 }));
 
 describe("Register Component", () => {
-  const mockOnRegisterSuccess = vi.fn();
-  const mockOnSwitchToLogin = vi.fn();
+	const mockOnRegisterSuccess = vi.fn();
+	const mockOnSwitchToLogin = vi.fn();
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-    localStorage.clear();
-  });
+	beforeEach(() => {
+		vi.clearAllMocks();
+		localStorage.clear();
+	});
 
-  it("renders the registration form", () => {
-    render(<Register onRegisterSuccess={mockOnRegisterSuccess} onSwitchToLogin={mockOnSwitchToLogin} />);
-    
-    expect(screen.getByText(/Create Account/i)).toBeInTheDocument();
-    // Using LabelText ensures your accessibility IDs are working
-    expect(screen.getByLabelText(/Email Address/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/^Password$/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Confirm Password/i)).toBeInTheDocument();
-  });
+	it("renders the registration form", () => {
+		render(
+			<Register
+				onRegisterSuccess={mockOnRegisterSuccess}
+				onSwitchToLogin={mockOnSwitchToLogin}
+			/>,
+		);
 
-  it("shows client-side validation error when passwords do not match", async () => {
-    render(<Register onRegisterSuccess={mockOnRegisterSuccess} onSwitchToLogin={mockOnSwitchToLogin} />);
+		expect(screen.getByText(/Create Account/i)).toBeInTheDocument();
+		// Using LabelText ensures your accessibility IDs are working
+		expect(screen.getByLabelText(/Email Address/i)).toBeInTheDocument();
+		expect(screen.getByLabelText(/^Password$/i)).toBeInTheDocument();
+		expect(screen.getByLabelText(/Confirm Password/i)).toBeInTheDocument();
+	});
 
-    fireEvent.change(screen.getByLabelText(/Email Address/i), { target: { value: "test@me.com" } });
-    fireEvent.change(screen.getByLabelText(/^Password$/i), { target: { value: "password123" } });
-    fireEvent.change(screen.getByLabelText(/Confirm Password/i), { target: { value: "different123" } });
+	it("shows client-side validation error when passwords do not match", async () => {
+		render(
+			<Register
+				onRegisterSuccess={mockOnRegisterSuccess}
+				onSwitchToLogin={mockOnSwitchToLogin}
+			/>,
+		);
 
-    fireEvent.click(screen.getByRole("button", { name: /Register/i }));
+		fireEvent.change(screen.getByLabelText(/Email Address/i), {
+			target: { value: "test@me.com" },
+		});
+		fireEvent.change(screen.getByLabelText(/^Password$/i), {
+			target: { value: "password123" },
+		});
+		fireEvent.change(screen.getByLabelText(/Confirm Password/i), {
+			target: { value: "different123" },
+		});
 
-    // Use { exact: false } to handle the emoji prefix
-    expect(await screen.findByText(/Passwords do not match/i, { exact: false })).toBeInTheDocument();
-    expect(api.post).not.toHaveBeenCalled();
-  });
+		fireEvent.click(screen.getByRole("button", { name: /Register/i }));
 
-  it("handles successful registration", async () => {
-    const mockToken = "new-user-token";
-    (api.post as any).mockResolvedValueOnce({ data: { token: mockToken } });
+		// Use { exact: false } to handle the emoji prefix
+		expect(
+			await screen.findByText(/Passwords do not match/i, { exact: false }),
+		).toBeInTheDocument();
+		expect(api.post).not.toHaveBeenCalled();
+	});
 
-    render(<Register onRegisterSuccess={mockOnRegisterSuccess} onSwitchToRegister={mockOnSwitchToLogin} />);
+	it("handles successful registration", async () => {
+		const mockToken = "new-user-token";
+		vi.mocked(api.post).mockResolvedValueOnce({ data: { token: mockToken } });
 
-    fireEvent.change(screen.getByLabelText(/Email Address/i), { target: { value: "new@example.com" } });
-    fireEvent.change(screen.getByLabelText(/^Password$/i), { target: { value: "password123" } });
-    fireEvent.change(screen.getByLabelText(/Confirm Password/i), { target: { value: "password123" } });
+		render(
+			<Register
+				onRegisterSuccess={mockOnRegisterSuccess}
+				onSwitchToRegister={mockOnSwitchToLogin}
+			/>,
+		);
 
-    fireEvent.click(screen.getByRole("button", { name: /Register/i }));
+		fireEvent.change(screen.getByLabelText(/Email Address/i), {
+			target: { value: "new@example.com" },
+		});
+		fireEvent.change(screen.getByLabelText(/^Password$/i), {
+			target: { value: "password123" },
+		});
+		fireEvent.change(screen.getByLabelText(/Confirm Password/i), {
+			target: { value: "password123" },
+		});
 
-    await waitFor(() => {
-      expect(localStorage.getItem("token")).toBe(mockToken);
-      expect(mockOnRegisterSuccess).toHaveBeenCalled();
-    });
-    
-    // Check that it wrapped the data in a 'user' key for Rails
-    expect(api.post).toHaveBeenCalledWith("/api/v1/users", {
-      user: {
-        email_address: "new@example.com",
-        password: "password123",
-        password_confirmation: "password123"
-      }
-    });
-  });
+		fireEvent.click(screen.getByRole("button", { name: /Register/i }));
 
-  it("shows loading state while registering", async () => {
-  // 1. Mock the API to stay pending
-  (api.post as any).mockReturnValue(new Promise(() => {}));
+		await waitFor(() => {
+			expect(localStorage.getItem("token")).toBe(mockToken);
+			expect(mockOnRegisterSuccess).toHaveBeenCalled();
+		});
 
-  render(<Register onRegisterSuccess={mockOnRegisterSuccess} onSwitchToLogin={mockOnSwitchToLogin} />);
+		// Check that it wrapped the data in a 'user' key for Rails
+		expect(api.post).toHaveBeenCalledWith("/api/v1/users", {
+			user: {
+				email_address: "new@example.com",
+				password: "password123",
+				password_confirmation: "password123",
+			},
+		});
+	});
 
-  // 2. Fill fields to satisfy HTML5 validation
-  fireEvent.change(screen.getByLabelText(/Email Address/i), { target: { value: "test@me.com" } });
-  fireEvent.change(screen.getByLabelText(/^Password$/i), { target: { value: "password123" } });
-  fireEvent.change(screen.getByLabelText(/Confirm Password/i), { target: { value: "password123" } });
+	it("shows loading state while registering", async () => {
+		// 1. Mock the API to stay pending
+		vi.mocked(api.post).mockReturnValue(new Promise(() => {}));
 
-  // 3. Click the Register button
-  const submitButton = screen.getByRole("button", { name: /Register/i });
-  fireEvent.click(submitButton);
+		render(
+			<Register
+				onRegisterSuccess={mockOnRegisterSuccess}
+				onSwitchToLogin={mockOnSwitchToLogin}
+			/>,
+		);
 
-  // 4. FIX: Instead of searching for text globally, check the button we already have
-  await waitFor(() => {
-    expect(submitButton).toBeDisabled();
-    // This looks at the text inside the button specifically
-    expect(submitButton.textContent).toContain("Creating Account...");
-  });
-});
+		// 2. Fill fields to satisfy HTML5 validation
+		fireEvent.change(screen.getByLabelText(/Email Address/i), {
+			target: { value: "test@me.com" },
+		});
+		fireEvent.change(screen.getByLabelText(/^Password$/i), {
+			target: { value: "password123" },
+		});
+		fireEvent.change(screen.getByLabelText(/Confirm Password/i), {
+			target: { value: "password123" },
+		});
 
-  it("displays server-side error messages (Rails format)", async () => {
-    const railsErrors = ["Email has already been taken", "Password is too short"];
-    (api.post as any).mockRejectedValueOnce({
-      response: { data: { errors: railsErrors } },
-    });
+		// 3. Click the Register button
+		const submitButton = screen.getByRole("button", { name: /Register/i });
+		fireEvent.click(submitButton);
 
-    render(<Register onRegisterSuccess={mockOnRegisterSuccess} onSwitchToLogin={mockOnSwitchToLogin} />);
+		// 4. FIX: Instead of searching for text globally, check the button we already have
+		await waitFor(() => {
+			expect(submitButton).toBeDisabled();
+			// This looks at the text inside the button specifically
+			expect(submitButton.textContent).toContain("Creating Account...");
+		});
+	});
 
-    // Fill fields to bypass HTML5 validation
-    fireEvent.change(screen.getByLabelText(/Email Address/i), { target: { value: "taken@me.com" } });
-    fireEvent.change(screen.getByLabelText(/^Password$/i), { target: { value: "123" } });
-    fireEvent.change(screen.getByLabelText(/Confirm Password/i), { target: { value: "123" } });
+	it("displays server-side error messages (Rails format)", async () => {
+		const railsErrors = [
+			"Email has already been taken",
+			"Password is too short",
+		];
+		const mockedApi = vi.mocked(api.post);
+		mockedApi.mockRejectedValueOnce({
+			response: { data: { errors: railsErrors } },
+		});
 
-    fireEvent.click(screen.getByRole("button", { name: /Register/i }));
+		render(
+			<Register
+				onRegisterSuccess={mockOnRegisterSuccess}
+				onSwitchToLogin={mockOnSwitchToLogin}
+			/>,
+		);
 
-    // It should join the errors with a comma as per your implementation
-    const expectedError = railsErrors.join(", ");
-    expect(await screen.findByText(expectedError, { exact: false })).toBeInTheDocument();
-  });
+		// Fill fields to bypass HTML5 validation
+		fireEvent.change(screen.getByLabelText(/Email Address/i), {
+			target: { value: "taken@me.com" },
+		});
+		fireEvent.change(screen.getByLabelText(/^Password$/i), {
+			target: { value: "123" },
+		});
+		fireEvent.change(screen.getByLabelText(/Confirm Password/i), {
+			target: { value: "123" },
+		});
+
+		fireEvent.click(screen.getByRole("button", { name: /Register/i }));
+
+		// It should join the errors with a comma as per your implementation
+		const expectedError = railsErrors.join(", ");
+		expect(
+			await screen.findByText(expectedError, { exact: false }),
+		).toBeInTheDocument();
+	});
 });
