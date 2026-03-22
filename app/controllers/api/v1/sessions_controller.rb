@@ -9,7 +9,7 @@ module Api
         if user&.authenticate(params[:password])
           # Generate token (Assuming you have a WebToken helper or logic in User model)
           token = JwtService.encode(user_id: user.id)
-          
+
           render json: {
             token: token,
             user: { id: user.id, email: user.email_address }
@@ -20,7 +20,7 @@ module Api
       end
 
       def destroy
-        # With JWT, 'logging out' is usually handled by the client 
+        # With JWT, 'logging out' is usually handled by the client
         # deleting the token, but you can implement blacklisting here.
         head :no_content
       end

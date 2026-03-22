@@ -2,17 +2,30 @@
 namespace :ci do
   desc "Migrate, Build, and Run RSpec + Vitest"
   task :all do
+    # GOOD: Use the built-in Rails task
+    system("bin/rails test:system")
+
+    puts "--- 🔍 Linting Ruby (RuboCop) ---"
+    ruby_lint_success = system("bundle exec rubocop")
+
     puts "--- Preparing Database ---"
-    # 'db:test:prepare' is fine, but we follow it with RSpec
     system("bin/rails db:test:prepare")
 
-    puts "\n--- Running RSpec ---"
-    # Use 'bundle exec rspec' specifically to avoid 'rails test'
+    puts "--- Running RSpec ---"
     rspec_success = system("bundle exec rspec")
 
-    puts "\n--- Running Vitest ---"
+    puts "--- Running Vitest ---"
     vitest_success = system("npx vitest run app/javascript")
 
-    exit(1) unless rspec_success && vitest_success
+    if rspec_success && vitest_success && ruby_lint_success
+     puts "--- All tests passed ---"
+     exit(0)
+    else
+    puts "--- Some tests failed ---"
+     puts "Rspec failed" unless rspec_success
+     puts "Vitest failed" unless vitest_success
+     puts "Rubcop  failed" unless ruby_lint_success
+     exit(1)
+    end
   end
 end

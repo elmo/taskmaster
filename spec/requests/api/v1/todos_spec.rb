@@ -28,7 +28,7 @@ RSpec.describe "Api::V1::Todos", type: :request do
       expect {
         post api_v1_todos_path, params: valid_params, headers: headers, as: :json
       }.to change(user.todos, :count).by(1)
-      
+
       expect(response).to have_http_status(:created)
     end
 
@@ -49,7 +49,7 @@ RSpec.describe "Api::V1::Todos", type: :request do
 
     it "prevents updating another user's todo" do
       others_todo = create(:todo, user: other_user)
-      
+
       # Rails will raise ActiveRecord::RecordNotFound because of the scoped 'find'
       patch api_v1_todo_path(others_todo), params: { todo: { title: "Hack" } }, headers: headers, as: :json
       expect(response).to have_http_status(:not_found)

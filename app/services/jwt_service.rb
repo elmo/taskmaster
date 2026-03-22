@@ -1,4 +1,4 @@
-require 'jwt'
+require "jwt"
 
 class JwtService
   # Use the Rails secret key base so it's consistent
@@ -12,7 +12,7 @@ class JwtService
   def self.decode(token)
     body = JWT.decode(token, SECRET_KEY)[0]
     HashWithIndifferentAccess.new body
-  rescue JWT::DecodeError => e 
+  rescue JWT::DecodeError => e
     Rails.logger.error "JWT Decode Error: #{e.message}"
     nil # This is what's hitting you!
   end

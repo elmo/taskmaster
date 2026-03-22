@@ -3,7 +3,9 @@
 one:
   title: MyString
   completed: false
+  user_id: <%= ActiveRecord::FixtureSet.identify(:one) %>
 
 two:
   title: MyString
   completed: false
+  user_id: <%= ActiveRecord::FixtureSet.identify(:two) %>

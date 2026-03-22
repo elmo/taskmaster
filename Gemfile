@@ -30,9 +30,9 @@ gem "solid_cache"
 gem "solid_queue"
 gem "solid_cable"
 gem "jwt"
-gem 'rack-cors'
-gem 'dotenv'
-gem 'vite_rails'
+gem "rack-cors"
+gem "dotenv"
+gem "vite_rails"
 
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
@@ -50,7 +50,7 @@ group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
   gem "rspec-rails"
-  gem 'factory_bot_rails'
+  gem "factory_bot_rails"
 
   # Audits gems for known security defects (use config/bundler-audit.yml to ignore issues)
   gem "bundler-audit", require: false

@@ -1,6 +1,6 @@
 class RegistrationsController < ApplicationController
-  # 1. Skip the login requirement for these two actions
-  #allow_unauthenticated_access only: [ :new, :create ]
+  include Authentication
+  allow_unauthenticated_access only: [ :new, :create ]
 
   def new
     @user = User.new
@@ -10,10 +10,10 @@ class RegistrationsController < ApplicationController
     @user = User.new(user_params)
 
     if @user.save
-      # 2. 'start_new_session_for' is the Rails 8 helper that 
+      # 2. 'start_new_session_for' is the Rails 8 helper that
       #    creates a session record and sets the signed cookie.
       start_new_session_for @user
-      
+
       redirect_to root_path, notice: "Welcome aboard! You've successfully signed up."
     else
       # If validation fails (e.g., email already taken), show the form again

@@ -3,7 +3,7 @@ module Api
   module V1
     class UsersController < ApiController
       # We skip the JWT check because the user doesn't have a token yet!
-      skip_before_action :authenticate_by_jwt, only: [:create]
+      skip_before_action :authenticate_by_jwt, only: [ :create ]
 
       def create
         @user = User.new(user_params)
@@ -11,7 +11,7 @@ module Api
         if @user.save
           # Create a fresh token for the new user
           token = JwtService.encode({ user_id: @user.id })
-          
+
           render json: {
             token: token,
             user: { id: @user.id, email_address: @user.email_address }
