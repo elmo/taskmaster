@@ -7,16 +7,13 @@
   },
   "development": {
     "autoBuild": true,
-    "publicOutputDir": "vite-dev",
     "port": 5173
   },
   "test": {
-    "autoBuild": false,
-    "publicOutputDir": "vite-test",
-    "port": 5173
+    "autoBuild": true,
+    "port": 5174 
   },
   "production": {
-    "autoBuild": false,
-    "publicOutputDir": "vite"
+    "autoBuild": false
   }
 }

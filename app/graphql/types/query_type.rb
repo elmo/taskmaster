@@ -17,10 +17,22 @@ module Types
     end
 
     # Define the field
-    field :todos, [ Types::TodoType ], null: false, description: "Returns a list of tasks"
+    field :todos, [ Types::TodoType ], null: false, description: "Returns a list of todos" do
+      argument :completed, Boolean, required: false
+    end
 
-    def todos
-      Todo.all
+    field :me, Types::UserType, null: true, description: "Returns the currently logged-in user"
+
+    def me
+      context[:current_user]
+    end
+
+    def todos(completed: nil)
+      user = context[:current_user]
+      return [] unless user
+      scope = user.todos
+      scope = scope.where(completed: completed) unless completed.nil?
+      scope.order(created_at: :desc)
     end
   end
 end

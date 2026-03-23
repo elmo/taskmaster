@@ -1,0 +1,25 @@
+# .github/workflows/ruby_test.yml
+steps:
+  - uses: actions/checkout@v4
+  - name: Set up Ruby
+    uses: ruby/setup-ruby@v1
+    with:
+      bundler-cache: true
+  
+  - name: Set up Node
+    uses: actions/setup-node@v4
+    with:
+      node-version: '20' # Match your local version
+      cache: 'npm'
+
+  - name: Install dependencies
+    run: npm install
+
+  # ADD THIS STEP BEFORE RAILS TEST:
+  - name: Precompile Vite Assets for Test
+    run: bundle exec vite build
+    env:
+      RAILS_ENV: test
+
+  - name: Run Tests
+    run: bin/rails test

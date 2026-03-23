@@ -1,45 +1,72 @@
 import { useState } from "react";
-import api from "../utils/api";
+import api from "../../utils/api";
 
 const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
-	const [formData, setFormData] = useState({
-		email_address: "",
-		password: "",
-		password_confirmation: "",
-	});
-	const [error, setError] = useState(null);
-	const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "", // Changed to match Rails/GraphQL standards
+    password: "",
+    passwordConfirmation: "",
+  });
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-	const handleChange = (e) => {
-		setFormData({ ...formData, [e.target.name]: e.target.value });
-	};
+  const REGISTER_MUTATION = `
+    mutation RegisterUser($email: String!, $password: String!, $passwordConfirmation: String!) {
+      createUser(input: { 
+        email: $email, 
+        password: $password, 
+        passwordConfirmation: $passwordConfirmation 
+      }) {
+        token
+        user { id email }
+        errors
+      }
+    }
+  `;
 
-	const handleSubmit = async (e) => {
-		e.preventDefault();
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-		if (formData.password !== formData.password_confirmation) {
-			setError("Passwords do not match.");
-			return;
-		}
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-		setLoading(true);
-		setError(null);
+    if (formData.password !== formData.passwordConfirmation) {
+      setError("Passwords do not match.");
+      return;
+    }
 
-		try {
-			const { data } = await api.post("/api/v1/users", { user: formData });
-			localStorage.setItem("token", data.token);
-			onRegisterSuccess();
-		} catch (err) {
-			const messages = err.response?.data?.errors;
-			setError(
-				Array.isArray(messages) ? messages.join(", ") : "Registration failed.",
-			);
-		} finally {
-			setLoading(false);
-		}
-	};
+    setLoading(true);
+    setError(null);
 
-	return (
+    try {
+      const { data } = await api.post("/graphql", {
+        query: REGISTER_MUTATION,
+	operationName: "SignUp",
+        variables: {
+          email: formData.email,
+          password: formData.password,
+          passwordConfirmation: formData.passwordConfirmation
+        }
+      });
+
+      const result = data.data.createUser;
+
+      if (result.token) {
+        localStorage.setItem("token", result.token);
+        onRegisterSuccess();
+      } else {
+        // Rails validation errors (e.g., "Email is invalid") come here
+        setError(result.errors.join(", "));
+      }
+    } catch (err) {
+      setError("An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
 		<div className="max-w-md mx-auto mt-0 p-8 bg-white rounded-2xl shadow-2xl border border-gray-100">
 			<div className="text-center mb-8">
 				<h2 className="text-3xl font-bold text-gray-800">Create Account</h2>
@@ -57,7 +84,7 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
 						Email Address
 					</label>
 					<input
-						id="email_address" 
+						id="email_address" // FIXED: Added ID to match label htmlFor
 						name="email_address"
 						type="email"
 						className="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
@@ -95,7 +122,7 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
 						Confirm Password
 					</label>
 					<input
-						id="password_confirmation"
+						id="password_confirmation" // FIXED: Added ID to match label htmlFor
 						name="password_confirmation"
 						type="password"
 						className="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
@@ -163,7 +190,7 @@ const Register = ({ onRegisterSuccess, onSwitchToLogin }) => {
 				</p>
 			</div>
 		</div>
-	);
+  );
 };
 
 export default Register;

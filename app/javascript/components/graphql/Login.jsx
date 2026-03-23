@@ -1,31 +1,63 @@
 // app/javascript/components/Login.jsx
 import { useState } from "react";
-import api from "../utils/api";
+import api from "../../utils/api";
 
 const Login = ({ onLoginSuccess }) => {
-	const [email, setEmail] = useState("");
-	const [password, setPassword] = useState("");
-	const [error, setError] = useState(null);
-	const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-	const handleSubmit = async (e) => {
-		e.preventDefault();
-		setLoading(true);
-		setError(null);
 
-		try {
-			const { data } = await api.post("/api/v1/login", { email, password });
-			localStorage.setItem("token", data.token);
-			onLoginSuccess();
-		} catch (err) {
-			const message = err.response?.data?.error || "Invalid email or password.";
-			setError(message);
-		} finally {
-			setLoading(false);
-		}
-	};
+  const LOGIN_MUTATION = `
+    mutation LoginUser($email: String!, $password: String!) {
+    loginUser(input: { email: $email, password: $password }) {
+      token
+      user { email }
+      errors
+    }
+  }
+`;
 
-	return (
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setError(null);
+
+  try {
+    const response = await api.post("/graphql", {
+      query: LOGIN_MUTATION,
+      operationName: "LoginUser",
+      variables: { email, password }
+    });
+
+    // Axios gives you 'data'. GraphQL puts its result inside 'data.data'.
+    const graphQLResponse = response.data;
+
+    // Check for GraphQL syntax/schema errors first
+    if (graphQLResponse.errors) {
+      setError(graphQLResponse.errors[0].message);
+      return;
+    }
+
+    const result = graphQLResponse.data?.loginUser;
+
+    if (result?.token) {
+      localStorage.setItem("token", result.token);
+      onLoginSuccess();
+    } else {
+      // This handles "Invalid email/password" from your Ruby resolve method
+      setError(result?.errors?.join(", ") || "Invalid credentials.");
+    }
+  } catch (err) {
+    // This handles network 500 errors or timeout issues
+    setError("Server connection failed. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+  return (
 		<div className="max-w-md mx-auto mt-0 p-8 bg-white rounded-2xl shadow-2xl border border-gray-100">
 			<div className="text-center mb-8">
 				<h2 className="text-3xl font-bold text-gray-800">Welcome Back</h2>
@@ -87,7 +119,9 @@ const Login = ({ onLoginSuccess }) => {
 				</button>
 			</form>
 		</div>
-	);
+
+  );
 };
 
 export default Login;
+
