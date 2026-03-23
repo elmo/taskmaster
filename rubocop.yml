@@ -1,0 +1,42 @@
+require:
+  - rubocop-rails
+  - rubocop-performance
+
+AllCops:
+  NewCops: enable
+  Exclude:
+    - 'db/schema.rb'
+    - 'db/migrate/*'
+    - 'bin/*'
+    - 'node_modules/**/*'
+    - 'vendor/**/*'
+    - 'config/environments/*'
+
+# Rails 8 follows modern Ruby conventions
+Style/Documentation:
+  Enabled: false # Stops nagging for comments at the top of every class
+
+# GraphQL files often have many fields, making classes long
+Metrics/ClassLength:
+  Exclude:
+    - 'app/graphql/types/**/*'
+    - 'app/graphql/mutations/**/*'
+
+# GraphQL blocks (field definitions) can get deeply nested
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
+    - 'config/routes.rb'
+    - 'app/graphql/types/**/*'
+    - 'app/graphql/mutations/**/*'
+
+# Allow more descriptive (longer) line lengths for GraphQL fields
+Layout/LineLength:
+  Max: 120
+  Exclude:
+    - 'db/migrate/*'
+
+# Ensure Rails 8 specific patterns are followed
+Rails/Output:
+  Exclude:
+    - 'db/seeds.rb'
